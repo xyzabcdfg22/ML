@@ -175,28 +175,55 @@ show collections
 // db.Fact_Sales.find().pretty()
 
 //==============================================================================================================================
-// (write after show collections of each to show joined output )
 // ==============================================================================================================================
 db.Fact_Sales.aggregate([
+  // Join with Customer table
   { $lookup: { from: "Customer_Dim", localField: "customerId", foreignField: "customerId", as: "customer" } },
   { $unwind: "$customer" },
+
+  // Join with City and Country (customer location hierarchy)
+  { $lookup: { from: "City_Dim", localField: "customer.cityId", foreignField: "cityId", as: "customerCity" } },
+  { $unwind: "$customerCity" },
+  { $lookup: { from: "Country_Dim", localField: "customerCity.countryId", foreignField: "countryId", as: "customerCountry" } },
+  { $unwind: "$customerCountry" },
+
+  // Join with Product, Brand, and Category (product hierarchy)
   { $lookup: { from: "Product_Dim", localField: "productId", foreignField: "productId", as: "product" } },
   { $unwind: "$product" },
+  { $lookup: { from: "Brand_Dim", localField: "product.brandId", foreignField: "brandId", as: "brand" } },
+  { $unwind: "$brand" },
+  { $lookup: { from: "Category_Dim", localField: "product.categoryId", foreignField: "categoryId", as: "category" } },
+  { $unwind: "$category" },
+
+  // Join with Store and its City
   { $lookup: { from: "Store_Dim", localField: "storeId", foreignField: "storeId", as: "store" } },
   { $unwind: "$store" },
+  { $lookup: { from: "City_Dim", localField: "store.cityId", foreignField: "cityId", as: "storeCity" } },
+  { $unwind: "$storeCity" },
+
+  // Join with Time dimension
   { $lookup: { from: "Time_Dim", localField: "timeId", foreignField: "timeId", as: "time" } },
   { $unwind: "$time" },
+
+  // Select final fields to show in output
   {
     $project: {
       saleId: 1,
       quantity: 1,
       totalAmount: 1,
       "customer.name": 1,
+      "customer.email": 1,
+      "customerCity.city": 1,
+      "customerCountry.country": 1,
       "product.name": 1,
+      "brand.brand": 1,
+      "category.category": 1,
       "store.name": 1,
+      "storeCity.city": 1,
       "time.date": 1
     }
   }
 ])
+
 
 
