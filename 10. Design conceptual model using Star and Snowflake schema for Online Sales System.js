@@ -53,6 +53,28 @@ show collections
 // (Optional) Check data
 // db.Fact_Sales.find().pretty()
 
+db.Fact_Sales.aggregate([
+  { $lookup: { from: "Customer_Dim", localField: "customerId", foreignField: "customerId", as: "customer" } },
+  { $unwind: "$customer" },
+  { $lookup: { from: "Product_Dim", localField: "productId", foreignField: "productId", as: "product" } },
+  { $unwind: "$product" },
+  { $lookup: { from: "Store_Dim", localField: "storeId", foreignField: "storeId", as: "store" } },
+  { $unwind: "$store" },
+  { $lookup: { from: "Time_Dim", localField: "timeId", foreignField: "timeId", as: "time" } },
+  { $unwind: "$time" },
+  {
+    $project: {
+      saleId: 1,
+      quantity: 1,
+      totalAmount: 1,
+      "customer.name": 1,
+      "product.name": 1,
+      "store.name": 1,
+      "time.date": 1
+    }
+  }
+])
+
 
 // ==========================================
 // 🔵 SNOWFLAKE SCHEMA - Online Sales System
@@ -60,6 +82,18 @@ show collections
 
 // Use same database (OnlineSalesDB)
 use OnlineSalesDB
+
+// to drop earlier collections
+// db.Country_Dim.drop()
+// db.City_Dim.drop()
+// db.Customer_Dim.drop()
+// db.Brand_Dim.drop()
+// db.Category_Dim.drop()
+// db.Product_Dim.drop()
+// db.Time_Dim.drop()
+// db.Store_Dim.drop()
+// db.Fact_Sales.drop()
+
 
 // ==========================================
 // 1️⃣ Country Dimension
@@ -141,7 +175,7 @@ show collections
 // db.Fact_Sales.find().pretty()
 
 //==============================================================================================================================
-// OPTIONAL (write after show collections of each to show joined output )
+// (write after show collections of each to show joined output )
 // ==============================================================================================================================
 db.Fact_Sales.aggregate([
   { $lookup: { from: "Customer_Dim", localField: "customerId", foreignField: "customerId", as: "customer" } },
