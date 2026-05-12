@@ -1,0 +1,18 @@
+1. NPM version check
+npm --version
+2. Angular CLI install
+npm install -g @angular/cli@latest
+3. New Angular project create
+ng new project
+4. Project folder ke andar jana
+cd project
+5. Angular app run karna
+ng serve
+6. Browser me open karna
+http://localhost:4200
+7. Angular analytics disable (optional)
+ng analytics disable
+8. Agar ng command work na kare
+npm install -g @angular/cli
+
+
